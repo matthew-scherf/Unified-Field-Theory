@@ -1,0 +1,10 @@
+chapter AFP
+
+session "Unified_Field_Theory" (AFP) = HOL +
+  description \<open>Unified Field Theory (non-dual formalization).\<close>
+  options [timeout = 1800, document = pdf]
+  theories
+    Unified_Field_Theory
+  document_files
+    "root.tex"
+    "root.bib"

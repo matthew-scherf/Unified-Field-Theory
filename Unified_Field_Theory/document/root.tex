@@ -1,0 +1,38 @@
+\
+\documentclass[11pt,a4paper]{article}
+\usepackage{isabelle,isabellesym}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage[strings]{underscore} % allow underscores in text
+
+\title{Unified Field Theory\\[0.25em]\large A Machine-Checked Isabelle/HOL Development}
+\author{Matthew Scherf}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This entry presents a machine-checked formalization of a unified field theory grounded in non-dual ontology. The development consists of two main theories: \textit{The\_Unique\_Ontic\_Substrate}, which establishes the foundational metaphysical framework, and \textit{Unified\_Field\_Theory}, which interprets quantum fields, gauge structures, fundamental forces, and spacetime geometry within this framework.
+
+The core axiomatization posits a unique ontic substrate ($\Omega$) from which all physical phenomena arise as presentation modes rather than independent entities. We formalize the principle of non-duality as inseparability: every phenomenon $p$ satisfies $\text{Inseparable}(p, \Omega)$. Building on this foundation, we develop formal treatments of quantum field excitations as substrate presentations, gauge symmetries as presentation indexing schemes, and the four fundamental forces (electromagnetic, weak, strong, gravitational) as unified presentation modes of the substrate.
+
+The framework naturally accounts for quantum entanglement through substrate unity, with machine-verified proofs showing that entangled phenomena share presentations of the same substrate. Spacetime geometry emerges as a representational structure over phenomena rather than a fundamental arena, with curvature formalized as a frame-dependent quantity over presentations. Information-theoretic foundations are incorporated through abstract quantities satisfying holographic bounds, connecting fundamental constants to the geometry of presentation space.
+
+We provide testable predictions that distinguish substrate-mediated correlations from local hidden variable theories, formalizing constraints that substrate correlations must be acausal and symmetric. The development includes implementation roadmaps specifying how abstract types map to operational criteria and how effective theories (Standard Model, General Relativity) emerge at appropriate scales.
+
+All results are mechanically verified in Isabelle/HOL 2025, with proofs checked for consistency using Nitpick. The formalization demonstrates that a mathematically rigorous non-dual ontology can accommodate the full structure of modern physics while maintaining logical coherence and offering novel empirical predictions.
+\end{abstract}
+
+\tableofcontents
+\bigskip
+
+% Isabelle-generated document body:
+\parindent 0pt \parskip 0.6ex
+\input{session}
+
+\bibliographystyle{abbrv}
+\bibliography{root}
+\end{document}

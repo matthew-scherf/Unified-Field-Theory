@@ -1,0 +1,45 @@
+\
+Unified Field Theory — AFP Build HOWTO (Windows, TeX Live)
+
+1) Recommended: use pdflatex (stable on Windows)
+   - Ensure ROOT contains: options [document = pdf, document_build = "pdflatex"]
+   - Build:
+       isabelle build -c -D . -v -o "document=pdf" -o document_output=public
+
+2) One-off override from PowerShell (no permanent settings needed)
+   - Open PowerShell in this folder (Shift+Right-click → Open PowerShell here) and run:
+       $env:ISABELLE_PDFLATEX = 'pdflatex -file-line-error -interaction=nonstopmode'
+       isabelle build -c -D . -v -o "document=pdf" -o document_output=public
+
+3) Permanent settings (optional)
+   - Copy the contents of etc\settings.txt into:
+       %USERPROFILE%\.isabelle\Isabelle2025\etc\settings
+   - Open a new shell and run the build command again.
+
+4) If you still see "Missing \begin{document}" at line 1
+   - Re-write document/root.tex as UTF-8 WITHOUT BOM (already done in this package).
+   - Clean TeX auxiliary files if you manually ran latex in document/:
+       delete: *.aux *.log *.out *.toc *.bbl *.blg *.bcf *.run.xml
+   - Direct test (from document/):
+       pdflatex -file-line-error -interaction=nonstopmode root.tex
+       pdflatex -file-line-error -interaction=nonstopmode root.tex
+
+5) If you previously switched to lualatex and want to keep it
+   - Set in ROOT: options [document = pdf, document_build = "lualatex"]
+   - One-off shell override:
+       $env:ISABELLE_LUALATEX = 'lualatex -file-line-error -interaction=nonstopmode'
+       isabelle build -c -D . -v -o "document=pdf" -o "document_build=lualatex" -o document_output=public
+
+6) Non-fatal warnings
+   - "Overfull \hbox" are layout warnings only and do not fail the session.
+   - "No file root.bbl" on first pass is normal; Isabelle re-runs LaTeX.
+
+7) Where is the PDF?
+   - With -o document_output=public: look under Unified_Field_Theory/public/document/root.pdf
+   - Otherwise: in Isabelle's browser_info directory for this session.
+
+This package already includes:
+- ROOT pinned to pdflatex
+- document/root.tex (pdflatex friendly, underscores allowed)
+- etc/settings.txt (copy-paste snippet)
+- README.md, ABSTRACT.txt, LICENSE

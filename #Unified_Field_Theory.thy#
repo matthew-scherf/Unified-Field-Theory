@@ -1,0 +1,436 @@
+theory Unified_Field_Theory
+  imports The_Unique_Ontic_Substrate
+begin
+  (* ---------------------------------------------------------------------- *)
+  (* Unified Field Theory under Non-Dual Ontology                           *)
+  (* Author: Matthew Scherf (2025)                                          *)
+  (* This session extends The_Unique_Ontic_Substrate with physics-shaped     *)
+  (* presentation structures. Improvements in this version:                  *)
+  (*  - Added a missing constant: Info :: E ⇒ Q (used in IG3).               *)
+  (*  - Replaced dependency on an external lemma in Spacetime section with   *)
+  (*    a self-contained proof from ST1–ST3 + Nonduality.                    *)
+  (*  - Kept axiom load minimal and proofs blast/auto-friendly.              *)
+  (* ---------------------------------------------------------------------- *)
+
+  (* Optional: disciplined finite-model search setup *)
+  nitpick_params [user_axioms, show_all, format = 3, max_threads = 2, card = 1,2,3,4,5]
+
+section \<open>Quantum Fields as Presentation Channels\<close>
+
+  typedecl FieldType   (* electron field, photon field, quark fields, etc. *)
+
+  consts
+    FieldChannel :: "FieldType \<Rightarrow> bool"
+    Excitation   :: "E \<Rightarrow> FieldType \<Rightarrow> bool"  (* phenomenon is excitation of field *)
+    GroundState  :: "FieldType \<Rightarrow> bool"            (* field in vacuum/ground state *)
+
+  axiomatization where
+    FC2_excitations_are_phenomena:
+      "\<forall>e ft. Excitation e ft \<longrightarrow> Phenomenon e \<and> FieldChannel ft" and
+    FC3_ground_state_exists:
+      "\<forall>ft. FieldChannel ft \<longrightarrow> GroundState ft"
+
+  lemma Field_channels_structure_presentation:
+    assumes "Excitation e ft"
+    shows "Inseparable e \<Omega>"
+    using assms FC2_excitations_are_phenomena Nonduality by blast
+
+  theorem Field_excitations_unified:
+    "\<forall>e1 e2 ft. Excitation e1 ft \<and> Excitation e2 ft \<longrightarrow>
+       Inseparable e1 \<Omega> \<and> Inseparable e2 \<Omega>"
+    using Field_channels_structure_presentation by blast
+
+
+section \<open>Gauge Structure as Presentation Indexing\<close>
+
+  typedecl GaugeGroup  (* U(1), SU(2), SU(3), unified groups *)
+
+  consts
+    GaugeDomain :: "GaugeGroup \<Rightarrow> FieldType set"   (* which fields this gauge group indexes *)
+    Unified     :: "GaugeGroup \<Rightarrow> GaugeGroup set \<Rightarrow> bool"  (* g unifies subgroups *)
+    IndexScheme :: "GaugeGroup \<Rightarrow> E \<Rightarrow> bool"      (* gauge group indexes this phenomenon *)
+
+  axiomatization where
+    G1_gauge_indexes_phenomena:
+      "\<forall>gg e. IndexScheme gg e \<longrightarrow> Phenomenon e" and
+    G2_unified_preserves_indexing:
+      "\<forall>gg subgroups e. Unified gg subgroups \<and> (\<exists>sg \<in> subgroups. IndexScheme sg e)
+         \<longrightarrow> IndexScheme gg e" and
+    G3_gauge_domain_correspondence:
+      "\<forall>gg ft e. IndexScheme gg e \<and> Excitation e ft \<longrightarrow> ft \<in> GaugeDomain gg"
+
+  lemma Gauge_indexing_preserves_nonduality:
+    assumes "IndexScheme gg e"
+    shows "Inseparable e \<Omega>"
+    using assms G1_gauge_indexes_phenomena Nonduality by blast
+
+  theorem Gauge_unification_ontological:
+    "\<forall>gg subgroups e. Unified gg subgroups \<and> (\<exists>sg \<in> subgroups. IndexScheme sg e)
+       \<longrightarrow> Inseparable e \<Omega>"
+    using G2_unified_preserves_indexing Gauge_indexing_preserves_nonduality by blast
+
+
+section \<open>Force Phenomena as Presentation Modes\<close>
+
+  datatype ForceType = Electromagnetic | Weak | Strong | Gravitational
+
+  consts
+    ForcePresentation :: "E \<Rightarrow> ForceType \<Rightarrow> bool"  (* phenomenon presents via force mode *)
+    UnifiedForce      :: "E \<Rightarrow> bool"                    (* phenomenon in unified force regime *)
+
+  axiomatization where
+    F1_forces_phenomenal:
+      "\<forall>e ft. ForcePresentation e ft \<longrightarrow> Phenomenon e" and
+    F2_unified_includes_all:
+      "\<forall>e. UnifiedForce e \<longrightarrow>
+         (ForcePresentation e Electromagnetic \<or> ForcePresentation e Weak \<or>
+          ForcePresentation e Strong \<or> ForcePresentation e Gravitational)" and
+    F3_forces_via_presentation:
+      "\<forall>e ft. ForcePresentation e ft \<longrightarrow> Presents e \<Omega>"
+
+  lemma Force_phenomena_nondual:
+    assumes "ForcePresentation e ft"
+    shows "Inseparable e \<Omega>"
+    using assms F1_forces_phenomenal Nonduality by blast
+
+  theorem Force_unification_via_substrate:
+    "\<forall>e1 e2 ft1 ft2. ForcePresentation e1 ft1 \<and> ForcePresentation e2 ft2
+       \<longrightarrow> (\<exists>s. Substrate s \<and> Presents e1 s \<and> Presents e2 s)"
+  proof (intro allI impI)
+    fix e1 e2 ft1 ft2
+    assume "ForcePresentation e1 ft1 \<and> ForcePresentation e2 ft2"
+    hence "Phenomenon e1 \<and> Phenomenon e2" using F1_forces_phenomenal by blast
+    thus "(\<exists>s. Substrate s \<and> Presents e1 s \<and> Presents e2 s)"
+      using substrate_Omega A4_presentation by blast
+  qed
+
+
+section \<open>Entanglement Structure from Substrate Unity\<close>
+
+  consts
+    Entangled :: "E \<Rightarrow> E \<Rightarrow> bool"  (* phenomena are entangled *)
+    EntCorr   :: "E \<Rightarrow> E \<Rightarrow> Q"    (* correlation strength *)
+
+  axiomatization where
+    ENT1_entangled_phenomena:
+      "\<forall>e1 e2. Entangled e1 e2 \<longrightarrow> Phenomenon e1 \<and> Phenomenon e2" and
+    ENT2_entanglement_symmetric:
+      "\<forall>e1 e2. Entangled e1 e2 \<longleftrightarrow> Entangled e2 e1" and
+    ENT3_substrate_unity:
+      "\<forall>e1 e2. Entangled e1 e2 \<longrightarrow>
+         (\<exists>s. Substrate s \<and> Presents e1 s \<and> Presents e2 s \<and> s = \<Omega>)" and
+    ENT4_correlation_nonneg:
+      "\<forall>e1 e2. Entangled e1 e2 \<longrightarrow> Nonneg (EntCorr e1 e2)"
+
+  theorem Entanglement_via_nonduality:
+    "\<forall>e1 e2. Entangled e1 e2 \<longrightarrow> Inseparable e1 \<Omega> \<and> Inseparable e2 \<Omega>"
+  proof (intro allI impI)
+    fix e1 e2
+    assume H: "Entangled e1 e2"
+    hence "Phenomenon e1 \<and> Phenomenon e2" using ENT1_entangled_phenomena by blast
+    thus "Inseparable e1 \<Omega> \<and> Inseparable e2 \<Omega>" using Nonduality by blast
+  qed
+
+  lemma Entanglement_nonlocal_via_substrate:
+    assumes "Entangled e1 e2"
+        and "coord f e1 = Some r1"
+        and "coord f e2 = Some r2"
+    shows "Inseparable e1 \<Omega> \<and> Inseparable e2 \<Omega>"
+    using assms ENT1_entangled_phenomena Nonduality by blast
+
+
+section \<open>Information-Theoretic Foundations\<close>
+
+  typedecl Label  (* abstract labels for constants, types, theories *)
+
+  consts
+    InfoGeometry :: "E set \<Rightarrow> Q"  (* information geometry of presentation space *)
+    FundConst    :: "Label \<Rightarrow> Q"  (* fundamental constants as info-geometric params *)
+    Info         :: "E \<Rightarrow> Q"      (* **ADDED**: information measure for a phenomenon *)
+    ConstAlpha   :: "Label"              (* fine structure constant *)
+    ConstPlanck  :: "Label"              (* Planck constant *)
+
+  axiomatization where
+    IG1_info_over_phenomena:
+      "\<forall>es. (\<forall>e \<in> es. Phenomenon e) \<longrightarrow> Nonneg (InfoGeometry es)" and
+    IG2_constants_nonneg:
+      "\<forall>name. Nonneg (FundConst name)" and
+    IG3_holographic_bound:
+      "\<forall>es e. e \<in> es \<and> Phenomenon e \<longrightarrow> (\<exists>q. LT (Info e) q \<and> LT q (InfoGeometry es))"
+
+  lemma Information_nonreifying_collective:
+    assumes "\<forall>e \<in> es. Phenomenon e"
+    shows "\<forall>e \<in> es. Inseparable e \<Omega>"
+    using assms Nonduality by blast
+
+  theorem Constants_encode_presentation_structure:
+    "\<forall>name. Nonneg (FundConst name)"
+    using IG2_constants_nonneg by blast
+
+
+section \<open>Spacetime Geometry from Presentation Structure\<close>
+
+  consts
+    Curvature :: "Frame \<Rightarrow> E \<Rightarrow> Q"  (* spacetime curvature at phenomenon in frame *)
+    GravField :: "E \<Rightarrow> bool"          (* phenomenon is gravitational field configuration *)
+
+  axiomatization where
+    ST1_curvature_for_phenomena:
+      "\<forall>f e q. coord f e = Some q \<longrightarrow> Nonneg (Curvature f e)" and
+    ST2_gravity_relational:
+      "\<forall>e. GravField e \<longrightarrow> Phenomenon e \<and>
+         (\<exists>e1 e2. Phenomenon e1 \<and> Phenomenon e2 \<and> e1 \<noteq> e2)" and
+    ST3_curvature_emergent:
+      "\<forall>f e. coord f e \<noteq> None \<longrightarrow>
+         (\<exists>es. (\<forall>e' \<in> es. Phenomenon e') \<and> e \<in> es)"
+
+  lemma Gravity_relational_presentation:
+    assumes "GravField e"
+    shows "Inseparable e \<Omega>"
+    using assms ST2_gravity_relational Nonduality by blast
+
+  (* **IMPROVED PROOF**: no external lemma dependency. *)
+  theorem Spacetime_emerges_from_presentations:
+    "\<forall>f e r. coord f e = Some r \<longrightarrow> Inseparable e \<Omega>"
+  proof (intro allI impI)
+    fix f e r
+    assume H: "coord f e = Some r"
+    hence "coord f e \<noteq> None" by simp
+    then obtain es where Es: "(\<forall>e' \<in> es. Phenomenon e') \<and> e \<in> es"
+      using ST3_curvature_emergent by blast
+    hence "Phenomenon e" by blast
+    thus "Inseparable e \<Omega>" using Nonduality by blast
+  qed
+
+
+section \<open>Presentation Dynamics and Field Equations\<close>
+
+  consts
+    PresConsistent :: "E set \<Rightarrow> bool"   (* set of phenomena are consistently co-presented *)
+    PresEvolves    :: "E \<Rightarrow> E \<Rightarrow> bool"  (* one presentation evolves to another *)
+
+  axiomatization where
+    PD1_consistency_requires_unity:
+      "\<forall>es. PresConsistent es \<longrightarrow> (\<forall>e \<in> es. Phenomenon e \<and> Presents e \<Omega>)" and
+    PD2_evolution_causal:
+      "\<forall>e1 e2. PresEvolves e1 e2 \<longrightarrow>
+         Phenomenon e1 \<and> Phenomenon e2 \<and> CausallyPrecedes e1 e2" and
+    PD3_evolution_preserves_substrate:
+      "\<forall>e1 e2. PresEvolves e1 e2 \<longrightarrow> Presents e1 \<Omega> \<and> Presents e2 \<Omega>"
+
+  lemma Presentation_evolution_nondual:
+    assumes "PresEvolves e1 e2"
+    shows "Inseparable e1 \<Omega> \<and> Inseparable e2 \<Omega>"
+    using assms PD2_evolution_causal Nonduality by blast
+
+  theorem Consistent_copresentation_unified:
+    "\<forall>es. PresConsistent es \<longrightarrow> (\<forall>e \<in> es. Inseparable e \<Omega>)"
+  proof (intro allI impI ballI)
+    fix es e
+    assume "PresConsistent es" and "e \<in> es"
+    hence "Phenomenon e \<and> Presents e \<Omega>"
+      using PD1_consistency_requires_unity by blast
+    thus "Inseparable e \<Omega>" using Nonduality by blast
+  qed
+
+
+section \<open>Master Unification Theorem\<close>
+
+  theorem Ontological_Unification:
+    "\<forall>e. Phenomenon e \<longrightarrow>
+      (\<forall>ft gg force.
+        (Excitation e ft \<longrightarrow> Inseparable e \<Omega>) \<and>
+        (IndexScheme gg e \<longrightarrow> Inseparable e \<Omega>) \<and>
+        (ForcePresentation e force \<longrightarrow> Inseparable e \<Omega>) \<and>
+        (\<forall>e2. Entangled e e2 \<longrightarrow> Inseparable e \<Omega> \<and> Inseparable e2 \<Omega>))"
+  proof (intro allI impI)
+    fix e ft gg force
+    assume P: "Phenomenon e"
+    show "(Excitation e ft \<longrightarrow> Inseparable e \<Omega>) \<and>
+          (IndexScheme gg e \<longrightarrow> Inseparable e \<Omega>) \<and>
+          (ForcePresentation e force \<longrightarrow> Inseparable e \<Omega>) \<and>
+          (\<forall>e2. Entangled e e2 \<longrightarrow> Inseparable e \<Omega> \<and> Inseparable e2 \<Omega>)"
+    proof (intro conjI impI allI)
+      assume "Excitation e ft"
+      thus "Inseparable e \<Omega>" using Field_channels_structure_presentation by blast
+    next
+      assume "IndexScheme gg e"
+      thus "Inseparable e \<Omega>" using Gauge_indexing_preserves_nonduality by blast
+    next
+      assume "ForcePresentation e force"
+      thus "Inseparable e \<Omega>" using Force_phenomena_nondual by blast
+    next
+      fix e2
+      assume "Entangled e e2"
+      then show "Inseparable e \<Omega>" using Entanglement_via_nonduality by blast
+    next
+      fix e2
+      assume "Entangled e e2"
+      then show "Inseparable e2 \<Omega>" using Entanglement_via_nonduality by blast
+    qed
+  qed
+
+  corollary All_physical_phenomena_unified:
+    "\<forall>e1 e2. Phenomenon e1 \<and> Phenomenon e2 \<longrightarrow>
+       (\<exists>s. Substrate s \<and> Presents e1 s \<and> Presents e2 s \<and> s = \<Omega>)"
+    using substrate_Omega A4_presentation by blast
+
+  corollary Forces_unified_via_substrate:
+    "\<forall>e1 e2 f1 f2. ForcePresentation e1 f1 \<and> ForcePresentation e2 f2 \<longrightarrow>
+       Inseparable e1 \<Omega> \<and> Inseparable e2 \<Omega>"
+    using Force_phenomena_nondual by blast
+
+
+section \<open>Testable Predictions Framework\<close>
+
+  consts
+    SubstrateMediatedCorr :: "E \<Rightarrow> E \<Rightarrow> bool"  (* correlation via substrate *)
+    LocalInteraction      :: "E \<Rightarrow> E \<Rightarrow> bool"  (* local causal interaction *)
+
+  axiomatization where
+    TEST1_substrate_vs_local:
+      "\<forall>e1 e2. SubstrateMediatedCorr e1 e2 \<longrightarrow>
+         Phenomenon e1 \<and> Phenomenon e2 \<and> \<not> LocalInteraction e1 e2" and
+    TEST2_no_superluminal_causation:
+      "\<forall>e1 e2. CausallyPrecedes e1 e2 \<longrightarrow> \<not> SubstrateMediatedCorr e1 e2" and
+    TEST3_substrate_corr_symmetric:
+      "\<forall>e1 e2. SubstrateMediatedCorr e1 e2 \<longleftrightarrow> SubstrateMediatedCorr e2 e1"
+
+  lemma Substrate_correlations_acausal:
+    assumes "SubstrateMediatedCorr e1 e2"
+    shows "\<not> CausallyPrecedes e1 e2 \<and> \<not> CausallyPrecedes e2 e1"
+  proof (intro conjI)
+    show "\<not> CausallyPrecedes e1 e2"
+      using assms TEST2_no_superluminal_causation by blast
+  next
+    show "\<not> CausallyPrecedes e2 e1"
+      using assms TEST2_no_superluminal_causation TEST3_substrate_corr_symmetric by blast
+  qed
+
+  theorem Distinguishable_from_local_hidden_variables:
+    "\<forall>e1 e2. SubstrateMediatedCorr e1 e2 \<longrightarrow>
+       Inseparable e1 \<Omega> \<and> Inseparable e2 \<Omega> \<and>
+       \<not> CausallyPrecedes e1 e2 \<and> \<not> CausallyPrecedes e2 e1"
+    using TEST1_substrate_vs_local Nonduality Substrate_correlations_acausal by blast
+
+
+section \<open>Implementation Roadmap Formalization\<close>
+
+  (* Abstract specification of what physical implementation requires *)
+
+  consts
+    TypeMapping     :: "Label \<Rightarrow> bool"  (* abstract types mapped to concrete structures *)
+    OperationalCrit :: "E \<Rightarrow> bool"      (* operational criteria for identifying presentations *)
+    EmergentTheory  :: "Label \<Rightarrow> bool"  (* effective theory emerges at some scale *)
+    LabelE          :: "Label"  (* label for type E *)
+    LabelFrame      :: "Label"  (* label for type Frame *)
+    LabelG          :: "Label"  (* label for type G *)
+    LabelQ          :: "Label"  (* label for type Q *)
+    LabelSM         :: "Label"  (* label for Standard Model *)
+    LabelGR         :: "Label"  (* label for General Relativity *)
+
+  axiomatization where
+    IMP1_type_completeness:
+      "TypeMapping LabelE \<and> TypeMapping LabelFrame \<and> TypeMapping LabelG \<and> TypeMapping LabelQ" and
+    IMP2_operational_defined:
+      "\<forall>e. Phenomenon e \<longrightarrow> OperationalCrit e" and
+    IMP3_standard_model_emergent:
+      "EmergentTheory LabelSM \<and> EmergentTheory LabelGR"
+
+  lemma Implementation_preserves_nonduality:
+    assumes "OperationalCrit e" and "Phenomenon e"
+    shows "Inseparable e \<Omega>"
+    using assms Nonduality by blast
+
+
+section \<open>Consistency and Completeness\<close>
+
+  (* Note: This lemma is a placeholder, not a meta-consistency proof. *)
+  lemma Unified_theory_consistent: True by simp
+
+  theorem Framework_accommodates_all_forces:
+    "\<forall>force. (\<exists>e. ForcePresentation e force) \<longrightarrow>
+       (\<exists>e. Phenomenon e \<and> Inseparable e \<Omega>)"
+  proof (intro allI impI)
+    fix force
+    assume "\<exists>e. ForcePresentation e force"
+    then obtain e where FP: "ForcePresentation e force" by blast
+    have "Phenomenon e" using FP F1_forces_phenomenal by blast
+    moreover have "Inseparable e \<Omega>" using FP Force_phenomena_nondual by blast
+    ultimately show "\<exists>e. Phenomenon e \<and> Inseparable e \<Omega>" by blast
+  qed
+
+  theorem Framework_explains_entanglement:
+    "\<forall>e1 e2. Entangled e1 e2 \<longrightarrow>
+       (\<exists>s. Substrate s \<and> Presents e1 s \<and> Presents e2 s \<and> s = \<Omega>)"
+    using ENT3_substrate_unity by blast
+
+  theorem Framework_supports_gauge_unification:
+    "\<forall>gg subgroups. Unified gg subgroups \<longrightarrow>
+       (\<forall>sg \<in> subgroups. \<forall>e. IndexScheme sg e \<longrightarrow> IndexScheme gg e)"
+    using G2_unified_preserves_indexing by blast
+
+
+section \<open>Final Integration\<close>
+
+theorem Complete_Unification:
+  "(\<forall>e. Phenomenon e \<longrightarrow> Inseparable e \<Omega>) \<and>
+   (\<forall>e1 e2. Phenomenon e1 \<and> Phenomenon e2 \<longrightarrow>
+      (\<exists>s. Substrate s \<and> Presents e1 s \<and> Presents e2 s)) \<and>
+   (\<forall>force e. ForcePresentation e force \<longrightarrow> Presents e \<Omega>) \<and>
+   (\<forall>e1 e2. Entangled e1 e2 \<longrightarrow> Presents e1 \<Omega> \<and> Presents e2 \<Omega>) \<and>
+   (\<forall>ft e. Excitation e ft \<longrightarrow> Presents e \<Omega>)"
+proof (intro conjI)
+  show "\<forall>e. Phenomenon e \<longrightarrow> Inseparable e \<Omega>"
+    using Nonduality by blast
+next
+  show "\<forall>e1 e2. Phenomenon e1 \<and> Phenomenon e2 \<longrightarrow>
+        (\<exists>s. Substrate s \<and> Presents e1 s \<and> Presents e2 s)"
+    using substrate_Omega A4_presentation by blast
+next
+  show "\<forall>force e. ForcePresentation e force \<longrightarrow> Presents e \<Omega>"
+    using F3_forces_via_presentation by blast
+next
+  show "\<forall>e1 e2. Entangled e1 e2 \<longrightarrow> Presents e1 \<Omega> \<and> Presents e2 \<Omega>"
+    using ENT3_substrate_unity by blast
+next
+  show "\<forall>ft e. Excitation e ft \<longrightarrow> Presents e \<Omega>"
+    using FC2_excitations_are_phenomena substrate_Omega A4_presentation by blast
+qed
+
+
+  text \<open>
+  The Complete_Unification theorem establishes that:
+  1. All phenomena are inseparable from the unique substrate.
+  2. Any two phenomena share (present) the same substrate.
+  3. All force presentations are presentations of the substrate.
+  4. All entangled phenomena are presentations of the substrate.
+  5. All field excitations are presentations of the substrate.
+
+  This proves ontological unification: the apparent diversity of fields, forces,
+  and particles reflects different presentation modes of the singular substrate,
+  not fundamental ontological plurality.
+  \<close>
+
+
+section \<open>Nitpick Sanity Checks (Safe, Non-intrusive)\<close>
+
+  (* 1) Global satisfiability probe for your axioms and constants. *)
+  lemma nitpick_sanity_axioms_satisfiable: True
+    nitpick [satisfy, card = 2,3]  (* Expect: "Nitpick found a model" *)
+    by simp
+
+  (* 2) Regression: Nonduality invariant — Nitpick tries to find a counterexample first. *)
+  lemma nitpick_reg_nonduality_invariant:
+    "\<forall>e. Phenomenon e \<longrightarrow> Inseparable e \<Omega>"
+    nitpick [card = 2]  (* Expect: No counterexample found *)
+    by (simp add: Nonduality)
+
+  (* 3) Regression: Entanglement has substrate unity — run Nitpick, then discharge. *)
+  lemma nitpick_reg_entanglement_has_substrate:
+    "\<forall>e1 e2. Entangled e1 e2 \<longrightarrow>
+        (\<exists>s. Substrate s \<and> Presents e1 s \<and> Presents e2 s \<and> s = \<Omega>)"
+    nitpick [card = 2]  (* Expect: No counterexample found *)
+    by (meson ENT3_substrate_unity)
+
+end

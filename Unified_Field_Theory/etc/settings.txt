@@ -1,0 +1,7 @@
+\
+# Copy the following lines into %USERPROFILE%\.isabelle\Isabelle2025\etc\settings
+# or run the provided build script which sets the environment for the current shell.
+
+ISABELLE_PDFLATEX="pdflatex -file-line-error -interaction=nonstopmode"
+# If you want LuaLaTeX instead, comment the line above and uncomment the next:
+# ISABELLE_LUALATEX="lualatex -file-line-error -interaction=nonstopmode"
