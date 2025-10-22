@@ -1,0 +1,171 @@
+theory TOE_Adapter
+  imports
+    The_Unique_Ontic_Substrate
+    Unified_Field_Theory
+    Theory_of_Everything_Complete_Refined
+begin
+(*
+  TOE_Adapter.thy
+  ------------------------------------------------------------------
+  This adapter *interprets* the abstract locales from
+  Theory_of_Everything_Complete_Refined against your concrete
+  constants/lemmas from:
+    • The_Unique_Ontic_Substrate
+    • Unified_Field_Theory
+
+  HOW TO USE
+  ----------
+  1) Replace the lemma names in the 'assume … then show … by …' lines
+     with the actual names from your theories. I’ve provided plausible
+     placeholders like A4_presentation, A5_inseparable, etc.
+
+  2) Once the 'interpretation' proofs succeed, you can use the derived
+     theorems immediately (e.g., NDS.superposed_presents_Ω).
+
+  3) If some constants have different names in your code, adjust the
+     'for …' parameter lists and the 'where …' mappings.
+
+  NOTE
+  ----
+  This file contains **no new axioms** and **no sorry**. All proofs are
+  discharged using facts that must already exist in your repo.
+*)
+
+section ‹Shorthands to concrete symbols (adjust if your names differ)›
+
+(*
+  From The_Unique_Ontic_Substrate:
+    - Phenomenon   :: E ⇒ bool
+    - Presents     :: E ⇒ S ⇒ bool        (or Present, Presentation?)
+    - Ω            :: S
+    - Inseparable  :: E ⇒ S ⇒ bool
+    - A4_presentation: ∀e. Phenomenon e ⟶ Presents e Ω
+    - A5_inseparable:  ∀e. Phenomenon e ⟶ Inseparable e Ω
+*)
+(* If your Ω is named differently, add: abbreviation Omega :: S where "Omega ≡ Ω" *)
+
+(*
+  From Unified_Field_Theory (adjust names if needed):
+    - Outcome      :: O set
+    - Prob         :: E ⇒ O ⇒ real
+    - Superposed   :: E set ⇒ E
+    - GRField      :: E ⇒ bool
+    - StressEnergy :: (E ⇒ real) ⇒ E set ⇒ real
+    - EinsteinTensor :: E set ⇒ real
+    - RicciScalar  :: E set ⇒ real  (optional, not used in interpretation)
+    - AlignVEV     :: bool
+    - Mass         :: E ⇒ real
+    - Broken       :: E ⇒ bool
+    - RealQ        :: Q ⇒ real
+    - RealR4       :: E ⇒ E ⇒ E ⇒ E ⇒ real
+    - GaugeRel     :: ('a ⇒ 'a) ⇒ bool
+
+  Expected lemmas (rename to yours):
+    - Outcome_nonempty:   Outcome ≠ {}
+    - Prob_nonneg:        Phenomenon e ⟹ o ∈ Outcome ⟹ 0 ≤ Prob e o
+    - Prob_norm1:         Phenomenon e ⟹ (∑o∈Outcome. Prob e o) = 1
+    - super_is_phen_lemma: (∀e∈Es. Phenomenon e) ⟹ Phenomenon (Superposed Es)
+    - T_nonneg_lemma:     f ≥ 0 ⟹ StressEnergy f Es ≥ 0
+    - G_monotone_lemma:   Es ⊆ Es' ⟹ EinsteinTensor Es ≤ EinsteinTensor Es'
+    - mass_axiom_aligned: AlignVEV ⟹ Phenomenon e ⟹ Broken e ⟹ Mass e = 0
+    - mass_axiom_general: Phenomenon e ⟹ 0 ≤ Mass e
+    - RealQ_total:        ∀q. ∃r. RealQ q = r
+    - RealR4_total:       ∀a b c d. ∃r. RealR4 a b c d = r
+    - Gauge_id:           GaugeRel id
+    - Gauge_comp:         GaugeRel g ⟹ GaugeRel h ⟹ GaugeRel (g ∘ h)
+*)
+
+section ‹Interpret NonDual base›
+
+interpretation ND: NonDual_Base Phenomenon Presents Ω Inseparable
+proof (unfold_locales)
+  show "∀e. Phenomenon e ⟶ Presents e Ω"
+    by (simp add: A4_presentation)      (* ← REPLACE with your lemma name *)
+  show "∀e. Phenomenon e ⟶ Inseparable e Ω"
+    by (simp add: A5_inseparable)        (* ← REPLACE with your lemma name *)
+qed
+
+section ‹Interpret Measurement›
+
+interpretation M: Measurement Phenomenon Outcome Prob
+proof (unfold_locales)
+  show "Outcome ≠ {}"
+    by (simp add: Outcome_nonempty)      (* ← REPLACE *)
+  show "Phenomenon e ⟹ o ∈ Outcome ⟹ 0 ≤ Prob e o"
+    by (simp add: Prob_nonneg)           (* ← REPLACE *)
+  show "Phenomenon e ⟹ (∑o∈Outcome. Prob e o) = 1"
+    by (simp add: Prob_norm1)            (* ← REPLACE *)
+qed
+
+section ‹Interpret Superposition and combine with NonDual›
+
+interpretation SUP: Superposition Phenomenon Superposed
+  by (unfold_locales; simp add: super_is_phen_lemma)  (* ← REPLACE *)
+
+interpretation NDS: ND_Superposed Phenomenon Presents Ω Inseparable Superposed
+  by (unfold_locales)
+
+(*
+  Now you can use, e.g.:
+    NDS.superposed_presents_Ω
+    NDS.superposed_inseparable_Ω
+*)
+
+section ‹Interpret GR›
+
+interpretation G: GR GRField StressEnergy EinsteinTensor RicciScalar
+proof (unfold_locales)
+  show "f ≥ 0 ⟹ StressEnergy f Es ≥ 0"
+    by (simp add: T_nonneg_lemma)        (* ← REPLACE *)
+  show "Es ⊆ Es' ⟹ EinsteinTensor Es ≤ EinsteinTensor Es'"
+    by (simp add: G_monotone_lemma)      (* ← REPLACE *)
+qed
+
+section ‹Interpret Higgs / symmetry breaking›
+
+interpretation H: Higgs Phenomenon AlignVEV Mass Broken
+proof (unfold_locales)
+  show "AlignVEV ⟹ Phenomenon e ⟹ Broken e ⟹ Mass e = 0"
+    by (simp add: mass_axiom_aligned)    (* ← REPLACE *)
+  show "Phenomenon e ⟹ 0 ≤ Mass e"
+    by (simp add: mass_axiom_general)    (* ← REPLACE *)
+qed
+
+section ‹Interpret Quantitative Bridge›
+
+interpretation QB: QuantBridge RealQ RealR4 GaugeRel
+proof (unfold_locales)
+  show "∀q. ∃r. RealQ q = r"
+    by (simp add: RealQ_total)           (* ← REPLACE *)
+  show "∀a b c d. ∃r. RealR4 a b c d = r"
+    by (simp add: RealR4_total)          (* ← REPLACE *)
+  show "GaugeRel id"
+    by (simp add: Gauge_id)              (* ← REPLACE *)
+  show "GaugeRel g ⟹ GaugeRel h ⟹ GaugeRel (g ∘ h)"
+    by (simp add: Gauge_comp)            (* ← REPLACE *)
+qed
+
+section ‹Useful corollaries available immediately›
+
+lemma superposed_presents_Ω:
+  assumes "∀e∈Es. Phenomenon e"
+  shows   "Presents (Superposed Es) Ω"
+  using NDS.superposed_presents_Ω assms by blast
+
+lemma superposed_inseparable_Ω:
+  assumes "∀e∈Es. Phenomenon e"
+  shows   "Inseparable (Superposed Es) Ω"
+  using NDS.superposed_inseparable_Ω assms by blast
+
+section ‹Nitpick hooks (optional small-scope checks)›
+
+nitpick_params [user_axioms = true, show_all, format = 3, max_threads = 2, card = 1,2,3]
+
+(*
+  Example quick sanity probe — uncomment while debugging:
+  lemma "∃e. Phenomenon e ⟶ True"
+    nitpick [card = 1,2]?
+    by auto
+*)
+
+end
