@@ -4,12 +4,7 @@ begin
   (* ---------------------------------------------------------------------- *)
   (* Unified Field Theory under Non-Dual Ontology                           *)
   (* Author: Matthew Scherf (2025)                                          *)
-  (* This session extends The_Unique_Ontic_Substrate with physics-shaped     *)
-  (* presentation structures. Improvements in this version:                  *)
-  (*  - Added a missing constant: Info :: E ⇒ Q (used in IG3).               *)
-  (*  - Replaced dependency on an external lemma in Spacetime section with   *)
-  (*    a self-contained proof from ST1–ST3 + Nonduality.                    *)
-  (*  - Kept axiom load minimal and proofs blast/auto-friendly.              *)
+  (* DOI: 10.5281/zenodo.17416440                                           *)
   (* ---------------------------------------------------------------------- *)
 
   (* Optional: disciplined finite-model search setup *)
